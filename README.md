@@ -26,6 +26,19 @@ This repository is pre-configured for direct deployment on **[Railway](https://r
 
 ---
 
+## ▲ Vercel Deployment
+
+The repository is configured as a Vercel project with two services:
+
+- `frontend` builds the Vite app and receives public requests on `/*`.
+- `backend` runs the Express API and receives public requests on `/api/*`.
+
+The frontend uses same-origin `/api` requests, so the Vercel rewrites route API traffic to the backend. There are no private service-to-service calls, so no service bindings are required.
+
+For durable scan history, provision an external MySQL database and add `MYSQL_URL` (or `DATABASE_URL`) as an environment variable in the Vercel project settings. Apply it to each environment you deploy, such as Production and Preview. Do not commit database credentials. After deployment, check `/api/health` and confirm that `db.driver` is `mysql`; without a working MySQL connection, the backend falls back to local JSON storage, which is not durable across Vercel function instances or deployments.
+
+---
+
 ## 💻 Local Development
 
 ### Prerequisites
