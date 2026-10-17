@@ -19,6 +19,7 @@ export default function HistoryPage() {
   const [query,       setQuery]       = useState('');
   const [onlyMyScans, setOnlyMyScans] = useState(false);
   const [dbStatus,    setDbStatus]    = useState<{ driver: string; connected: boolean; info: string } | null>(null);
+  const [historySource, setHistorySource] = useState<'server' | 'browser-cache'>('server');
   const navigate = useNavigate();
 
   const load = useCallback(async () => {
@@ -28,10 +29,9 @@ export default function HistoryPage() {
         fetchHistory(100, onlyMyScans),
         fetchHealth(),
       ]);
-      setScans(data);
-      if (health?.db) {
-        setDbStatus(health.db);
-      }
+      setScans(data.scans);
+      setHistorySource(data.source);
+      setDbStatus(health?.db ?? null);
     } catch {
       toast.error('Failed to load history');
     } finally {
@@ -45,9 +45,11 @@ export default function HistoryPage() {
 
   const del = async (id: number) => {
     try {
-      await deleteScanById(id);
+      await deleteScanById(id, historySource === 'browser-cache');
       setScans(s => s.filter(r => r.id !== id));
-      toast.success('Scan deleted');
+      toast.success(historySource === 'browser-cache'
+        ? 'Removed from this browser cache only'
+        : 'Scan deleted');
     } catch {
       toast.error('Delete failed');
     }
@@ -56,9 +58,11 @@ export default function HistoryPage() {
   const clearAll = async () => {
     if (!confirm(onlyMyScans ? 'Clear all your search history?' : 'Clear all scan history?')) return;
     try {
-      await clearAllHistory(onlyMyScans);
+      await clearAllHistory(onlyMyScans, historySource === 'browser-cache');
       setScans([]);
-      toast.success('History cleared');
+      toast.success(historySource === 'browser-cache'
+        ? 'Browser cache cleared; server history is unchanged'
+        : 'History cleared');
     } catch {
       toast.error('Clear failed');
     }
@@ -101,13 +105,26 @@ export default function HistoryPage() {
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2 flex-wrap">
             <span>Previous URL inspections and threat reports</span>
-            {dbStatus && (
+            {(dbStatus || historySource === 'browser-cache') && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/40">
                 <Database className="w-3 h-3 text-indigo-500" />
-                {dbStatus.driver === 'mysql' ? 'MySQL Database' : 'Local Persistent Storage'}
+                {historySource === 'browser-cache'
+                  ? 'Browser cache (API unavailable)'
+                  : dbStatus?.driver === 'mysql'
+                    ? 'MySQL database'
+                    : dbStatus?.driver === 'local'
+                      ? 'Local JSON fallback'
+                      : 'Server history'}
               </span>
             )}
           </p>
+          {(historySource === 'browser-cache' || dbStatus?.driver === 'local') && (
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 max-w-2xl">
+              {historySource === 'browser-cache'
+                ? 'Showing this browser’s cached scans because the history API is unavailable. Delete and clear actions affect only this browser cache.'
+                : 'The backend is using local JSON storage. On serverless hosts such as Vercel, local files may not persist across instances or deployments; configure MySQL for durable shared history.'}
+            </p>
+          )}
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
@@ -179,9 +196,9 @@ export default function HistoryPage() {
       {scans.length > 0 && (
         <div className="grid grid-cols-3 gap-4 mb-6">
           {[
-            { label: 'Total Recorded', value: scans.length, color: '#6366f1' },
-            { label: 'Phishing Threats', value: scans.filter(s => s.classification === 'phishing').length, color: '#ef4444' },
-            { label: 'Verified Safe', value: scans.filter(s => s.classification === 'safe').length, color: '#22c55e' },
+            { label: 'Loaded Records', value: scans.length, color: '#6366f1' },
+            { label: 'Phishing Results', value: scans.filter(s => s.classification === 'phishing').length, color: '#ef4444' },
+            { label: 'Safe Results', value: scans.filter(s => s.classification === 'safe').length, color: '#22c55e' },
           ].map(s => (
             <div key={s.label} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-4 text-center shadow-sm">
               <div className="text-2xl font-black" style={{ color: s.color }}>{s.value}</div>

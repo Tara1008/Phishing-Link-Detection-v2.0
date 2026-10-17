@@ -20,7 +20,7 @@ const FEATURE_META: Record<string, FeatureMeta> = {
     label: 'IP address used instead of domain',
     goodLabel: 'Standard domain name (No IP address)',
     description: (f, imp) =>
-      `Raw IP address in URL — contributed ${pct(imp)} to the ML model's phishing classification. `
+      `Raw IP address in URL — relative model signal weight ${pct(imp)} for this scan, not a score-point contribution. `
       + 'Legitimate websites almost always use registered domain names.',
     positive: f => !f.hasIpAddress,
     severity: (f, imp) => f.hasIpAddress ? (imp > 0.1 ? 'critical' : 'danger') : 'safe',
@@ -29,8 +29,8 @@ const FEATURE_META: Record<string, FeatureMeta> = {
     label: 'Suspicious top-level domain (TLD)',
     goodLabel: 'Standard trusted top-level domain',
     description: (f, imp) =>
-      `The TLD "${f.tld}" is associated with high phishing rates — the model weighted this at ${pct(imp)} importance. `
-      + 'Attackers register cheap, unrestricted TLDs to deploy phishing pages quickly.',
+      `The TLD "${f.tld}" is on this scanner's suspicious-TLD list — relative model signal weight ${pct(imp)} for this scan. `
+      + 'A TLD match is a URL signal, not proof that a site is malicious.',
     positive: f => !f.hasSuspiciousTld,
     severity: (f, imp) => f.hasSuspiciousTld ? (imp > 0.09 ? 'critical' : 'danger') : 'safe',
   },
@@ -39,8 +39,8 @@ const FEATURE_META: Record<string, FeatureMeta> = {
     goodLabel: 'No brand impersonation detected',
     description: (f, imp) =>
       `The domain "${f.domain}" is lexically similar to a known brand — `
-      + `similarity score contributed ${pct(imp)} to phishing probability. `
-      + 'Typosquatting uses subtle misspellings to deceive users.',
+      + `relative model signal weight ${pct(imp)} for this scan. `
+      + 'This lexical match can be a typosquatting indicator, but does not confirm impersonation.',
     positive: f => (f.brandSimilarity ?? 0) < 0.45,
     severity: (f, imp) => (f.brandSimilarity ?? 0) > 0.6 ? 'critical'
               : (f.brandSimilarity ?? 0) > 0.45 ? 'danger' : 'info',
@@ -71,7 +71,7 @@ const FEATURE_META: Record<string, FeatureMeta> = {
     description: (f, imp) => {
       const shown = f.suspiciousWords.slice(0, 4).map(w => `"${w}"`).join(', ');
       const extra = f.suspiciousWords.length > 4 ? ` (+${f.suspiciousWords.length - 4} more)` : '';
-      return `Keywords ${shown}${extra} were detected — contributing ${pct(imp)} to the classification. `
+      return `Keywords ${shown}${extra} were detected — relative model signal weight ${pct(imp)} for this scan. `
            + 'Phishing pages use trust-inducing words to impersonate legitimate services.';
     },
     positive: f => f.suspiciousWords.length === 0,
@@ -81,8 +81,8 @@ const FEATURE_META: Record<string, FeatureMeta> = {
     label: 'URL shortening service',
     goodLabel: 'Direct destination link (No shortener)',
     description: (f, imp) =>
-      `Routed through a URL shortener — model weight ${pct(imp)}. `
-      + 'Short URLs mask the real destination, making it impossible to judge safety at a glance.',
+      `The hostname matches a known URL shortener — relative model signal weight ${pct(imp)} for this scan. `
+      + 'This scanner does not follow the short link or inspect its destination.',
     positive: f => !f.isUrlShortener,
     severity: (f, imp) => f.isUrlShortener ? (imp > 0.05 ? 'danger' : 'warning') : 'safe',
   },
@@ -110,9 +110,9 @@ const FEATURE_META: Record<string, FeatureMeta> = {
     label: 'Newly coined domain (lexical age signal)',
     goodLabel: 'Established lexical domain pattern',
     description: (f, imp) =>
-      `Domain lexical age proxy scored ${((f.domainAgeProxy ?? 0.5) * 100).toFixed(0)}% — `
-      + `model weight ${pct(imp)}. `
-      + 'Freshly-coined-looking domains with random strings are strongly correlated with phishing campaigns.',
+      `The domain's lexical age proxy scored ${((f.domainAgeProxy ?? 0.5) * 100).toFixed(0)}% — `
+      + `relative model signal weight ${pct(imp)} for this scan. `
+      + 'This is estimated from the domain text; it is not registration-age or WHOIS data.',
     positive: f => (f.domainAgeProxy ?? 0.5) >= 0.6,
     severity: (f) => (f.domainAgeProxy ?? 0.5) < 0.3 ? 'danger'
               : (f.domainAgeProxy ?? 0.5) < 0.5 ? 'warning' : 'safe',

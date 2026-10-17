@@ -60,16 +60,16 @@ export default function BreakdownPanel({ result }: Props) {
         <div className="grid grid-cols-2 gap-2">
           <Metric label="Prediction" value={result.classification} />
           <Metric label="Risk score" value={`${result.risk_score}/100`} />
-          <Metric label="Confidence" value={`${Math.round(result.confidence * 100)}%`} />
+          <Metric label="Model confidence" value={`${Math.round(result.confidence * 100)}%`} />
           <Metric label="Model" value={modelLabel} />
         </div>
         <p className="text-xs text-slate-400 dark:text-slate-500 mt-3">
-          Confidence is not the same as verified accuracy. This model has no held-out performance score available.
+          Confidence reflects model consensus and decisiveness; it is not verified accuracy. Signal weights are relative indicators, not individual score-point contributions.
         </p>
         {riskSignals.length > 0 && (
           <div className="mt-4">
             <h5 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-              Highest-weight risk signals
+              Highest relative risk-signal weights
             </h5>
             <div className="space-y-2">
               {riskSignals.map(signal => (

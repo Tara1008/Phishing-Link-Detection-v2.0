@@ -32,6 +32,7 @@ export default function URLInput({ onAnalyze, loading }: Props) {
   const { ref: formRef, ...rest } = register('url', {
     required: 'Please enter a URL',
     minLength: { value: 3, message: 'URL too short' },
+    maxLength: { value: 2048, message: 'URL must be 2,048 characters or fewer' },
   });
 
   const submit = handleSubmit(data => {
@@ -79,6 +80,7 @@ export default function URLInput({ onAnalyze, loading }: Props) {
               type="url"
               id="url-input"
               placeholder="Enter any URL to scan…  e.g. https://example.com"
+              maxLength={2048}
               autoComplete="off"
               spellCheck={false}
               aria-label="URL to scan"
@@ -155,7 +157,7 @@ export default function URLInput({ onAnalyze, loading }: Props) {
 
 
       <p className="text-center text-xs text-slate-400 dark:text-slate-600 mt-3">
-        Press <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-slate-500 dark:text-slate-400 font-mono">Enter</kbd> or click Scan · Supports drag & drop
+        Press <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-slate-500 dark:text-slate-400 font-mono">Enter</kbd> or click Scan · Supports drag &amp; drop · Up to 2,048 characters
       </p>
     </div>
   );

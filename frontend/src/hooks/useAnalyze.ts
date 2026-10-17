@@ -93,7 +93,12 @@ export function useAnalyze(): UseAnalyzeReturn {
 }
 
 // ── Standalone fetch for history page ─────────────────────────────
-export async function fetchHistory(limit = 100, onlyMyScans = false): Promise<ScanResult[]> {
+export interface HistoryResponse {
+  scans: ScanResult[];
+  source: 'server' | 'browser-cache';
+}
+
+export async function fetchHistory(limit = 100, onlyMyScans = false): Promise<HistoryResponse> {
   const userId = getUserId();
   const params: Record<string, any> = { limit };
 
@@ -103,26 +108,27 @@ export async function fetchHistory(limit = 100, onlyMyScans = false): Promise<Sc
 
   try {
     const { data } = await api.get('/history', { params });
-    const serverScans = (data?.data ?? []) as ScanResult[];
+    if (!data?.success || !Array.isArray(data.data)) {
+      throw new Error(data?.error ?? 'Invalid history response');
+    }
+    const serverScans = data.data as ScanResult[];
 
     // Sync with local cache
     serverScans.forEach(saveToLocalCache);
-    return serverScans;
+    return { scans: serverScans, source: 'server' };
   } catch (err) {
     console.warn('Backend history fetch failed, returning local cache:', err);
     const cached = getLocalHistoryCache();
-    if (onlyMyScans) {
-      return cached.filter(s => s.session_id === userId);
-    }
-    return cached;
+    const scans = onlyMyScans
+      ? cached.filter(s => s.session_id === userId)
+      : cached;
+    return { scans, source: 'browser-cache' };
   }
 }
 
-export async function deleteScanById(id: number): Promise<void> {
-  try {
+export async function deleteScanById(id: number, localOnly = false): Promise<void> {
+  if (!localOnly) {
     await api.delete(`/history/${id}`);
-  } catch {
-    // Ignore backend deletion failure if offline
   }
 
   // Also remove from local cache
@@ -134,14 +140,12 @@ export async function deleteScanById(id: number): Promise<void> {
   }
 }
 
-export async function clearAllHistory(onlyMyScans = false): Promise<void> {
+export async function clearAllHistory(onlyMyScans = false, localOnly = false): Promise<void> {
   const userId = getUserId();
-  try {
+  if (!localOnly) {
     await api.delete('/history/clear', {
       params: { session_id: onlyMyScans ? userId : undefined },
     });
-  } catch {
-    // Ignore
   }
 
   // Also clear local cache

@@ -15,7 +15,7 @@ export default function Footer() {
               <span className="font-bold text-slate-900 dark:text-white">PhishGuard AI</span>
             </div>
             <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-              An intelligent URL phishing detector powered by heuristic analysis and machine-learning-ready architecture.
+              A URL-based phishing risk assessment combining a machine-learning ensemble with security heuristics. It does not inspect destination pages.
             </p>
           </div>
 
@@ -40,9 +40,9 @@ export default function Footer() {
           <div>
             <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">Disclaimer</h3>
             <p className="text-xs text-slate-400 dark:text-slate-500 leading-relaxed">
-              This tool provides an automated assessment based primarily on URL characteristics and heuristics.
-              It does not guarantee that a website is safe or malicious. Always exercise caution when sharing
-              sensitive information online.
+              This tool provides an automated assessment based on URL characteristics only. It does not visit
+              destination pages or guarantee that a website is safe or malicious. Always exercise caution when
+              sharing sensitive information online.
             </p>
           </div>
         </div>

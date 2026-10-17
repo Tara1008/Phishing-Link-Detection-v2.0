@@ -1,6 +1,5 @@
 import {
-  PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend
+  Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid
 } from 'recharts';
 import { motion } from 'framer-motion';
 import type { ScanResult } from '../../types';
@@ -8,20 +7,10 @@ import { getRiskColor } from '../../types';
 
 interface Props { result: ScanResult; }
 
-const COLORS = ['#22c55e', '#f59e0b', '#ef4444'];
-
 export default function ChartsSection({ result }: Props) {
   const { reasons, risk_score } = result;
 
-  // ── Pie: Risk Breakdown ────────────────────────────────────────
-  const safe       = Math.max(0, 100 - risk_score);
-  const pieData = [
-    { name: 'Safe Score',     value: safe        },
-    { name: 'Moderate Risk',  value: Math.min(risk_score, 40) },
-    { name: 'High Risk',      value: Math.max(0, risk_score - 40) },
-  ].filter(d => d.value > 0);
-
-  // These weights are model feature importances, not score-point contributions.
+  // The score is a combined output, not a sum of individual risk buckets.
   const featureData = reasons
     .filter(reason => !reason.positive && reason.model_importance !== undefined)
     .map(reason => ({
@@ -35,40 +24,49 @@ export default function ChartsSection({ result }: Props) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Pie */}
-      <ChartCard title="Risk Breakdown" subtitle="Score distribution">
-        <ResponsiveContainer width="100%" height={220}>
-          <PieChart>
-            <Pie
-              data={pieData}
-              cx="50%" cy="50%"
-              innerRadius={55}
-              outerRadius={85}
-              paddingAngle={3}
-              dataKey="value"
-              animationBegin={0}
-              animationDuration={1000}
+      <ChartCard title="Classification thresholds" subtitle={`Score ${risk_score}/100 · ${result.classification}`}>
+        <div className="px-1 pt-8 pb-3">
+          <div
+            className="relative flex h-3 overflow-visible rounded-full"
+            role="img"
+            aria-label={`Risk score ${risk_score} out of 100. Safe is 0 to 30, suspicious is 31 to 60, and phishing is 61 to 100.`}
+          >
+            <div className="w-[30%] rounded-l-full bg-green-500" />
+            <div className="w-[30%] bg-amber-400" />
+            <div className="w-[40%] rounded-r-full bg-red-500" />
+            <div
+              className="absolute -top-7 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-xs font-bold text-white dark:bg-white dark:text-slate-900"
+              style={{ left: `${risk_score}%` }}
             >
-              {pieData.map((_, i) => (
-                <Cell key={i} fill={COLORS[i]} />
-              ))}
-            </Pie>
-            <Tooltip
-              contentStyle={{ background: '#1e293b', border: 'none', borderRadius: 12, fontSize: 12 }}
-              labelStyle={{ color: '#94a3b8' }}
-              itemStyle={{ color: '#f1f5f9' }}
+              {risk_score}
+            </div>
+            <div
+              className="absolute -top-1.5 h-6 w-1 -translate-x-1/2 rounded-full border-2 border-white bg-slate-900 shadow dark:border-slate-900 dark:bg-white"
+              style={{ left: `${risk_score}%` }}
             />
-            <Legend
-              iconType="circle"
-              iconSize={8}
-              wrapperStyle={{ fontSize: 12 }}
-            />
-          </PieChart>
-        </ResponsiveContainer>
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
+            <div>
+              <div className="font-semibold text-green-700 dark:text-green-400">Safe</div>
+              <div className="text-slate-400">0–30</div>
+            </div>
+            <div>
+              <div className="font-semibold text-amber-700 dark:text-amber-400">Suspicious</div>
+              <div className="text-slate-400">31–60</div>
+            </div>
+            <div>
+              <div className="font-semibold text-red-700 dark:text-red-400">Phishing</div>
+              <div className="text-slate-400">61–100</div>
+            </div>
+          </div>
+          <p className="mt-4 text-center text-xs text-slate-400">
+            The score combines a model prediction with security heuristics; it is not a breakdown of individual score contributions.
+          </p>
+        </div>
       </ChartCard>
 
       {/* Bar: Feature Importance */}
-      <ChartCard title="Top model signals" subtitle="Relative importance for this prediction (not score points)">
+      <ChartCard title="Top model signals" subtitle="Relative signal weights for this prediction (not score contributions)">
         {featureData.length > 0 ? (
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={featureData} layout="vertical" margin={{ left: 8, right: 16 }}>

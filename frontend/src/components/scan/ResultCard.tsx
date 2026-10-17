@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Shield, ShieldAlert, ShieldX, Copy, Clock, Zap } from 'lucide-react';
+import { Shield, ShieldAlert, ShieldX, Copy, Zap } from 'lucide-react';
 import type { ScanResult } from '../../types';
 import { getRiskColor, getClassificationIcon } from '../../types';
 import GaugeChart from './GaugeChart';
@@ -27,15 +27,15 @@ export default function ResultCard({ result }: Props) {
   const color = getRiskColor(result.risk_score);
 
   const copyResult = () => {
-    const text = `PhishGuard AI Result\nURL: ${result.url}\nClassification: ${result.classification.toUpperCase()}\nRisk Score: ${result.risk_score}/100\nSecurity Grade: ${result.security_grade}\nConfidence: ${Math.round(result.confidence * 100)}%`;
+    const text = `PhishGuard AI Result\nURL: ${result.url}\nClassification: ${result.classification.toUpperCase()}\nRisk Score: ${result.risk_score}/100\nSecurity Grade: ${result.security_grade}\nModel Confidence (not verified accuracy): ${Math.round(result.confidence * 100)}%`;
     navigator.clipboard.writeText(text);
     toast.success('Result copied!', { icon: '📋' });
   };
 
   const stats = [
     { label: 'Risk Score',  value: `${result.risk_score}/100`,               color },
-    { label: 'Confidence',  value: `${Math.round(result.confidence * 100)}%`, color: '#6366f1' },
-    { label: 'Detection',   value: `${result.scan_duration_ms}ms`,            color: '#14b8a6' },
+    { label: 'Model Confidence', value: `${Math.round(result.confidence * 100)}%`, color: '#6366f1' },
+    { label: 'Analysis Time',    value: `${result.scan_duration_ms}ms`,            color: '#14b8a6' },
   ];
 
   return (
@@ -100,7 +100,7 @@ export default function ResultCard({ result }: Props) {
             <Detail label="Protocol"     value={result.protocol?.toUpperCase() || 'N/A'} />
             <Detail label="Domain"       value={result.domain || 'N/A'} />
             <Detail label="TLD"          value={result.tld || 'N/A'} />
-            <Detail label="Threat"       value={result.classification === 'phishing' ? 'Phishing Attack' : result.classification === 'suspicious' ? 'Potential Threat' : 'No Threat Detected'} />
+            <Detail label="Assessment"   value={result.classification === 'phishing' ? 'Strong risk indicators' : result.classification === 'suspicious' ? 'Some risk indicators' : 'No strong URL indicators'} />
             <Detail label="Scanned"      value={result.created_at ? new Date(result.created_at).toLocaleTimeString() : 'Just now'} />
           </div>
         </div>

@@ -24,6 +24,7 @@ export default function ExportPanel({ result }: Props) {
         risk_level: result.risk_level,
         security_grade: result.security_grade,
         confidence: `${Math.round(result.confidence * 100)}%`,
+        confidence_note: 'Model consensus estimate; not verified accuracy.',
       },
       url_breakdown: { protocol: result.protocol, domain: result.domain, subdomain: result.subdomain, path: result.path, tld: result.tld },
       features:  result.features,
@@ -35,7 +36,7 @@ export default function ExportPanel({ result }: Props) {
   };
 
   const exportCSV = () => {
-    const headers = ['URL', 'Classification', 'Risk Score', 'Security Grade', 'Confidence', 'Risk Level', 'Protocol', 'Domain', 'TLD', 'Has HTTPS', 'Has IP', 'Subdomains', 'Keywords', 'Scanned At'];
+    const headers = ['URL', 'Classification', 'Risk Score', 'Security Grade', 'Model Confidence (not verified accuracy)', 'Risk Level', 'Protocol', 'Domain', 'TLD', 'Has HTTPS', 'Has IP', 'Subdomains', 'Keywords', 'Scanned At'];
     const esc = (v: unknown) => { const s = String(v ?? ''); return s.includes(',') ? `"${s}"` : s; };
     const row = [
       result.url, result.classification, result.risk_score, result.security_grade,

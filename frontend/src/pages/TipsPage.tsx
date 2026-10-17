@@ -36,7 +36,7 @@ const TIPS = [
   {
     icon: Link2, color: 'from-blue-500 to-indigo-600',
     title: 'Shortened URLs',
-    content: 'URL shorteners (bit.ly, tinyurl) mask the real destination. Never click a shortened URL without expanding it first. Use tools like CheckShortURL.com or PhishGuard AI to reveal and analyze the actual destination before visiting.',
+    content: 'URL shorteners (bit.ly, tinyurl) can hide the final destination. Preview or expand a shortened link with a trusted tool before opening it. PhishGuard analyzes the URL text only; it does not follow short links or reveal their destination.',
   },
   {
     icon: Lock, color: 'from-slate-500 to-slate-700',

@@ -113,7 +113,7 @@ export default function ScanPage() {
             transition={{ delay: 0.2 }}
             className="text-slate-500 dark:text-slate-400 mb-10 max-w-xl mx-auto"
           >
-            Enter a URL below and get an instant risk score, security grade, and full explanation in under 100ms.
+            Enter a URL to receive a risk score, security grade, and feature-based explanation. The scanner analyzes the URL text only; it does not open the destination.
           </motion.p>
 
           <motion.div
@@ -175,7 +175,7 @@ export default function ScanPage() {
 
             {/* Disclaimer */}
             <p className="text-xs text-center text-slate-400 dark:text-slate-600 px-4">
-              ⚠️ This tool provides an automated assessment based on URL characteristics only. It does not guarantee that a website is safe or malicious. Always exercise caution.
+              This automated assessment is based on URL characteristics, not page content or live reputation data. It cannot guarantee that a website is safe or malicious; verify important links independently.
             </p>
           </motion.div>
         )}

@@ -1,46 +1,47 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
-  Shield, Zap, Lock, BarChart3, Globe, CheckCircle2,
-  ArrowRight, Star, ChevronDown, ChevronUp, Brain, Database
+  Shield, Zap, Lock, BarChart3, Globe, ArrowRight,
+  ChevronDown, ChevronUp, Brain, Database
 } from 'lucide-react';
 import { useState } from 'react';
 
 const FEATURES = [
-  { icon: Zap,      title: 'Instant Analysis',      desc: 'Get results in milliseconds with our heuristic engine powered by 20+ URL signals.' },
-  { icon: Brain,    title: 'AI-Ready Architecture',  desc: 'Rule-based engine today, ML model tomorrow. Designed for seamless upgrades.' },
-  { icon: BarChart3,title: 'Rich Explainability',   desc: 'Never just a label — every decision is backed by detailed reasons and risk scores.' },
-  { icon: Database, title: 'MySQL Persistence',      desc: 'Every scan is stored securely in MySQL for history, analytics, and audit trails.' },
-  { icon: Lock,     title: 'Security Graded A–F',   desc: 'Get a clear security grade alongside risk score, confidence, and classification.' },
-  { icon: Globe,    title: 'Full URL Breakdown',     desc: 'Protocol, domain, TLD, subdomains, entropy — every component analyzed.' },
+  { icon: Zap,       title: 'URL-only Analysis',       desc: 'The scanner parses the submitted URL and does not visit or fetch the destination website.' },
+  { icon: Brain,     title: 'Hybrid Risk Assessment',  desc: 'A Random Forest and XGBoost ensemble is combined with URL-based security heuristics.' },
+  { icon: BarChart3, title: 'Explainable Signals',     desc: 'Review the URL features, risk indicators, and relative model signal weights behind each result.' },
+  { icon: Database,  title: 'Scan History',            desc: 'History uses MySQL when configured and available; otherwise the backend falls back to local JSON storage.' },
+  { icon: Lock,      title: 'Score and Grade',         desc: 'Each scan returns a 0–100 risk score, a Safe/Suspicious/Phishing classification, and an A–F grade.' },
+  { icon: Globe,     title: 'URL Breakdown',            desc: 'Inspect the parsed protocol, domain, subdomains, path, TLD, and extracted URL features.' },
 ];
 
 const STATS = [
-  { value: '20+',   label: 'Detection Signals'  },
-  { value: '< 50ms',label: 'Analysis Speed'     },
-  { value: '95%',   label: 'Accuracy Rate'       },
-  { value: '100%',  label: 'Explainable'         },
+  { value: '26',      label: 'Model Input Features' },
+  { value: '3',       label: 'Risk Classifications' },
+  { value: 'A–F',     label: 'Security Grades' },
+  { value: 'URL-only',label: 'No Target Visits' },
 ];
 
 const HOW_IT_WORKS = [
-  { step: '01', title: 'Enter URL',         desc: 'Paste any URL into the scanner input field.' },
-  { step: '02', title: 'Feature Extraction',desc: '20+ signals are extracted from the URL structure.' },
-  { step: '03', title: 'Risk Scoring',      desc: 'A weighted algorithm calculates a 0–100 risk score.' },
-  { step: '04', title: 'Explanation',       desc: 'Detailed reasons explain exactly why the score was given.' },
+  { step: '01', title: 'Submit a URL',        desc: 'Paste a URL (up to 2,048 characters). If no scheme is supplied, it is parsed as HTTP.' },
+  { step: '02', title: 'Extract features',    desc: 'The backend parses URL structure and builds a 26-value feature vector.' },
+  { step: '03', title: 'Assess risk',          desc: 'An ensemble prediction is blended with security heuristics and threat safeguards.' },
+  { step: '04', title: 'Review the result',    desc: 'See the score, classification, grade, explanations, URL breakdown, and recommendation.' },
 ];
 
-const TESTIMONIALS = [
-  { name: 'Sai Shanthan', role: 'Senior Security Analyst', text: 'PhishGuard AI has become an essential part of my daily workflow, providing clear, actionable insights.', link: 'https://www.linkedin.com/in/shanthan-5386a5112/' },
-  { name: 'Marcus Adebayo',role: 'IT Manager',           text: 'We integrated PhishGuard into our SOC workflow. The API is clean and the explainability feature is a game-changer.' },
-  { name: 'Priya Sharma',  role: 'Cybersecurity Student',text: 'Perfect for learning how phishing URLs are crafted. The breakdown panel is essentially a phishing masterclass.' },
+const RESULT_GUIDE = [
+  { score: '0–30', classification: 'Safe', description: 'No strong phishing indicators were found by this URL-based assessment.' },
+  { score: '31–60', classification: 'Suspicious', description: 'Some risk indicators were found. Verify the domain before interacting with the site.' },
+  { score: '61–100', classification: 'Phishing', description: 'The URL has strong risk indicators. Do not enter sensitive information.' },
 ];
 
 const FAQS = [
-  { q: 'Is this tool 100% accurate?',                       a: 'No tool can guarantee 100% accuracy. PhishGuard AI uses heuristic analysis based on URL characteristics. Always verify important URLs independently.' },
-  { q: 'Does it actually visit the website?',               a: 'No. PhishGuard only analyzes the URL string itself — it does not make any HTTP request to the target URL, keeping you safe.' },
-  { q: 'Can I use the API programmatically?',               a: 'Yes! The backend exposes a REST API at POST /api/analyze. You can integrate it into your own security tools or workflows.' },
-  { q: 'What is the ML-Ready architecture?',                a: 'The code is structured so you can replace the rule-based engine with a trained ML model (e.g., scikit-learn, TensorFlow) by simply swapping the riskCalculator module.' },
-  { q: 'Why is MySQL used instead of localStorage only?',   a: 'MySQL provides persistent, queryable history across sessions and devices. localStorage is ephemeral — MySQL ensures your scan history and analytics are durable.' },
+  { q: 'How should I interpret the risk score?', a: 'The score ranges from 0 to 100. Scores 0–30 are classified Safe, 31–60 Suspicious, and 61–100 Phishing. The A–F grade uses separate score bands. These are automated URL assessments, not guarantees about the live site.' },
+  { q: 'Does the scanner open or check the website?', a: 'No. It analyzes the submitted URL text and its parsed features; it does not send a request to the destination, follow redirects, or inspect page content.' },
+  { q: 'How does the risk assessment work?', a: 'The backend extracts URL features, evaluates them with a Random Forest and XGBoost ensemble, then blends that model score with security heuristics and safeguards.' },
+  { q: 'What does confidence mean?', a: 'Confidence reflects model consensus, agreement, and how decisive its prediction is. It is not a measured accuracy rate or a guarantee that the classification is correct.' },
+  { q: 'Where is scan history stored?', a: 'The backend uses MySQL when valid MySQL settings are configured and the database is reachable. Otherwise it falls back to a local JSON file. On serverless hosts such as Vercel, local files may not persist across instances or deployments.' },
+  { q: 'Can I call the API directly?', a: 'Yes. The backend provides POST /api/analyze and GET /api/history, among other endpoints. Analysis requests accept a URL string up to 2,048 characters.' },
 ];
 
 function FAQItem({ q, a }: { q: string; a: string }) {
@@ -89,7 +90,7 @@ export default function LandingPage() {
         {/* Grid overlay */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzYzNjZmMSIgc3Ryb2tlLXdpZHRoPSIwLjMiIG9wYWNpdHk9IjAuMyIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-40 dark:opacity-20 pointer-events-none" />
 
-        <div className="relative z-10 max-w-5xl mx-auto text-center">
+        <div className="relative z-10 w-full max-w-5xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -97,14 +98,14 @@ export default function LandingPage() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 text-sm font-semibold mb-6"
           >
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            AI-Powered · Real-time · Explainable
+            URL-only · Hybrid scoring · Explainable
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1 }}
-            className="text-5xl sm:text-6xl lg:text-7xl font-black text-slate-900 dark:text-white leading-tight tracking-tight mb-6"
+            className="text-4xl sm:text-6xl lg:text-7xl font-black text-slate-900 dark:text-white leading-tight tracking-tight mb-6"
           >
             Detect Phishing
             <br />
@@ -117,7 +118,7 @@ export default function LandingPage() {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="text-lg sm:text-xl text-slate-500 dark:text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed"
           >
-            PhishGuard AI analyzes any URL in milliseconds using 20+ security signals, delivering an explainable risk score, security grade, and detailed breakdown.
+            PhishGuard AI evaluates URL structure with a hybrid model and security heuristics, then returns a risk score, classification, grade, and feature breakdown. It does not visit the destination website.
           </motion.p>
 
           <motion.div
@@ -153,14 +154,14 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: 0.6 }}
-            className="mt-16 inline-block"
+            className="mt-16 w-full"
           >
-            <div className="glass rounded-2xl px-6 py-4 shadow-glass max-w-lg mx-auto text-left">
+            <div className="glass w-full max-w-lg rounded-2xl px-6 py-4 shadow-glass mx-auto text-left">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-3 h-3 rounded-full bg-red-400" />
                 <div className="w-3 h-3 rounded-full bg-amber-400" />
                 <div className="w-3 h-3 rounded-full bg-green-400" />
-                <span className="ml-2 text-xs text-slate-400 font-mono">phishguard.ai/scan</span>
+                <span className="ml-2 text-xs text-slate-400 font-mono">Example scan result</span>
               </div>
               <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800 rounded-xl px-4 py-2.5 font-mono text-sm text-slate-600 dark:text-slate-300">
                 <span className="text-slate-400">🔗</span>
@@ -168,13 +169,14 @@ export default function LandingPage() {
                 <span className="px-2 py-0.5 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 text-xs font-bold rounded-full">PHISHING</span>
               </div>
               <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-                {[['Risk Score', '87/100', '#ef4444'], ['Grade', 'F', '#ef4444'], ['Confidence', '95%', '#6366f1']].map(([l, v, c]) => (
+                {[['Risk Score', '0–100', '#ef4444'], ['Grade', 'A–F', '#ef4444'], ['Confidence', 'Model estimate', '#6366f1']].map(([l, v, c]) => (
                   <div key={l} className="bg-white dark:bg-slate-900 rounded-lg p-2 border border-slate-100 dark:border-slate-700">
                     <div className="font-bold text-sm" style={{ color: c }}>{v}</div>
                     <div className="text-xs text-slate-400">{l}</div>
                   </div>
                 ))}
               </div>
+              <p className="mt-2 text-center text-xs text-slate-400">Illustrative labels only; actual results depend on the URL.</p>
             </div>
           </motion.div>
         </div>
@@ -203,8 +205,8 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <SectionHeader
             badge="Features"
-            title="Everything you need to stay safe"
-            desc="PhishGuard AI combines powerful URL analysis with beautiful visualisations and full explainability."
+            title="Tools to help assess URL risk"
+            desc="Review URL-derived signals, model and heuristic assessments, and the reasoning behind each result."
           />
           <motion.div
             variants={stagger.container}
@@ -234,7 +236,7 @@ export default function LandingPage() {
       {/* ── How it works ─────────────────────────────────────────── */}
       <section className="py-24 px-4">
         <div className="max-w-4xl mx-auto">
-          <SectionHeader badge="How it works" title="Four steps to know the truth" desc="" />
+          <SectionHeader badge="How it works" title="Four steps to assess a URL" desc="" />
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {HOW_IT_WORKS.map(({ step, title, desc }, i) => (
               <motion.div
@@ -257,33 +259,29 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Testimonials ─────────────────────────────────────────── */}
+      {/* ── Result guide ─────────────────────────────────────────── */}
       <section className="py-24 px-4 bg-slate-50 dark:bg-slate-950/50">
         <div className="max-w-5xl mx-auto">
-          <SectionHeader badge="Testimonials" title="Trusted by security professionals" desc="" />
+          <SectionHeader badge="Understanding results" title="What the score means" desc="Classification thresholds reflect the backend's current scoring logic. A score is an automated signal, not proof that a site is safe or malicious." />
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, i) => (
+            {RESULT_GUIDE.map(({ score, classification, description }, i) => (
               <motion.div
-                key={t.name}
+                key={classification}
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.12 }}
                 className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-card"
               >
-                <div className="flex mb-3">
-                  {Array.from({ length: 5 }).map((_, j) => (
-                    <Star key={j} className="w-4 h-4 text-amber-400 fill-amber-400" />
-                  ))}
-                </div>
-                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">"{t.text}"</p>
-                <div>
-                  <div className="font-semibold text-slate-900 dark:text-white text-sm">{t.link ? <a href={t.link} target="_blank" rel="noopener noreferrer" className="hover:underline">{t.name}</a> : t.name}</div>
-                  <div className="text-xs text-slate-400">{t.role}</div>
-                </div>
+                <div className="text-sm font-semibold text-indigo-500 mb-2">{score} / 100</div>
+                <h3 className="font-bold text-slate-900 dark:text-white mb-2">{classification}</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{description}</p>
               </motion.div>
             ))}
           </div>
+          <p className="text-xs text-center text-slate-400 dark:text-slate-500 mt-5">
+            Grades use separate thresholds: A (0–20), B (21–40), C (41–60), D (61–80), and F (81–100).
+          </p>
         </div>
       </section>
 
